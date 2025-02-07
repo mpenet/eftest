@@ -39,7 +39,7 @@ them, delivering a report on the tests as it goes.
 Typically these two functions are used together:
 
 ```clojure
-user=> (require '[eftest.runner :refer [find-tests run-tests]])
+user=> (require '[s-exp.eftest.runner :refer [find-tests run-tests]])
 nil
 user=> (run-tests (find-tests "test"))
 ...
@@ -119,13 +119,13 @@ You can also change the reporting function used. For example, if you
 want a colorized reporter but without the progress bar:
 
 ```clojure
-user=> (run-tests (find-tests "test") {:report eftest.report.pretty/report})
+user=> (run-tests (find-tests "test") {:report s-exp.eftest.report.pretty/report})
 ```
 
 Or JUnit output:
 
 ```clojure
-user=> (run-tests (find-tests "test") {:report eftest.report.junit/report})
+user=> (run-tests (find-tests "test") {:report s-exp.eftest.report.junit/report})
 ```
 
 Or maybe you just want the old Clojure test reporter:
@@ -135,12 +135,12 @@ user=> (run-tests (find-tests "test") {:report clojure.test/report})
 ```
 
 If you want to redirect reporting output to a file, use the
-`eftest.report/report-to-file` function:
+`s-exp.eftest.report/report-to-file` function:
 
 ```clojure
-user=> (require '[eftest.report :refer [report-to-file]])
+user=> (require '[s-exp.eftest.report :refer [report-to-file]])
 nil
-user=> (require '[eftest.report.junit :as ju])
+user=> (require '[s-exp.eftest.report.junit :as ju])
 nil
 user=> (run-tests (find-tests "test") {:report (report-to-file ju/report "test.xml")})
 ```

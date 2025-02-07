@@ -1,5 +1,8 @@
-(ns eftest.output-capture
-  (:import [java.io OutputStream ByteArrayOutputStream PrintStream PrintWriter]))
+(ns s-exp.eftest.output-capture
+  (:import (java.io OutputStream
+                    ByteArrayOutputStream
+                    PrintStream
+                    PrintWriter)))
 
 (def ^:dynamic *test-buffer* nil)
 

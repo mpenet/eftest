@@ -1,4 +1,4 @@
-(ns eftest.report
+(ns s-exp.eftest.report
   (:require [clojure.java.io :as io]
             [clojure.test :refer [*test-out*]]))
 

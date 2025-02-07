@@ -1,9 +1,9 @@
-(ns eftest.report.junit
+(ns s-exp.eftest.report.junit
   "A test reporter that outputs JUnit-compatible XML."
   (:require
    [clojure.stacktrace :as stack]
    [clojure.test :as test]
-   [eftest.report :as report :refer [*context*]]))
+   [s-exp.eftest.report :as report :refer [*context*]]))
 
 ;; XML generation based on junit.clj
 
