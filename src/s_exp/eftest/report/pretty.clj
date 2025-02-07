@@ -3,13 +3,13 @@
   (:require [clojure.data :as data]
             [clojure.string :as str]
             [clojure.test :as test]
-            [eftest.output-capture :as capture]
-            [eftest.report :as report]
             [fipp.engine :as fipp]
             [io.aviso.ansi :as ansi]
             [io.aviso.exception :as exception]
             [io.aviso.repl :as repl]
-            [puget.printer :as puget]))
+            [puget.printer :as puget]
+            [s-exp.eftest.output-capture :as capture]
+            [s-exp.eftest.report :as report]))
 
 (def ^:dynamic *fonts*
   "The ANSI codes to use for reporting on tests."

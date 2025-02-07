@@ -3,10 +3,11 @@
   (:require [clojure.java.io :as io]
             [clojure.test :as test]
             [clojure.tools.namespace.find :as find]
-            [eftest.output-capture :as capture]
-            [eftest.report :as report]
-            [eftest.report.pretty :as pretty])
-  (:import [java.util.concurrent Executors ExecutorService]))
+            [s-exp.eftest.output-capture :as capture]
+            [s-exp.eftest.report :as report]
+            [s-exp.eftest.report.pretty :as pretty])
+  (:import (java.util.concurrent Executors
+                                 ExecutorService)))
 
 (defmethod test/report :begin-test-run [_])
 
@@ -196,7 +197,7 @@
    :fail-fast true
    :multithread false
    :sort-vars false
-   :reporters [eftest.report.pretty/report]})
+   :reporters [pretty/report]})
 
 (defn- ret->exit-code
   [{:as _ret :keys [error fail]}]
