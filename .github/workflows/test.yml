@@ -5,18 +5,15 @@ on: [push]
 jobs:
   test:
     runs-on: ubuntu-latest
+    
     container:
       image: clojure:temurin-21-tools-deps-jammy
       volumes:
         - ${{ github.workspace }}:${{ github.workspace }}
+        
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v3
-
-      - name: Install clj
-        uses: DeLaGuardo/setup-clojure@13.0
-        with:
-          cli: 1.10.1.693
 
       - name: Test
         run: clj -X:test
