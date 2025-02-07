@@ -24,8 +24,8 @@
   (delete-dir (io/file "target/test-out"))
   (-> 's-exp.eftest.test-ns.single-failing-test
       sut/find-tests
-      (sut/run-tests {:report (report/report-to-file junit/report "target/test-out/junit.xml")}))
-  (is (string? (slurp "target/test-out/junit.xml"))))
+      (sut/run-tests {:reporters [(report/report-to-file junit/report "junit.xml")]}))
+  (is (string? (slurp "junit.xml"))))
 
 (def this-ns *ns*)
 
@@ -42,7 +42,7 @@
                                      :file "report_test.clj"
                                      :line 999
                                      :message "foo"}))))]
-    (is (= (str "\nFAIL in eftest.report-test/file-and-line-in-pretty-fail-report"
+    (is (= (str "\nFAIL in s-exp.eftest.report-test/file-and-line-in-pretty-fail-report"
                 " (report_test.clj:999)\n"
                 "foo\n"
                 "expected: "

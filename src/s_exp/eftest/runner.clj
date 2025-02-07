@@ -5,7 +5,8 @@
             [clojure.tools.namespace.find :as find]
             [s-exp.eftest.output-capture :as capture]
             [s-exp.eftest.report :as report]
-            [s-exp.eftest.report.pretty :as pretty])
+            ;; [s-exp.eftest.report.pretty :as pretty]
+            [s-exp.eftest.report.progress :as progress])
   (:import (java.util.concurrent Executors
                                  ExecutorService)))
 
@@ -73,11 +74,11 @@
 (defn- pmap* [executor f xs]
   (pcalls* executor (map (fn [x] #(f x)) xs)))
 
-(defn- multithread-vars? [{:keys [multithread?] :or {multithread? true}}]
-  (or (true? multithread?) (= multithread? :vars)))
+(defn- multithread-vars? [{:keys [multithread] :or {multithread true}}]
+  (or (true? multithread) (= multithread :vars)))
 
-(defn- multithread-namespaces? [{:keys [multithread?] :or {multithread? true}}]
-  (or (true? multithread?) (= multithread? :namespaces)))
+(defn- multithread-namespaces? [{:keys [multithread] :or {multithread true}}]
+  (or (true? multithread) (= multithread :namespaces)))
 
 (defn- multithread? [opts]
   (or (multithread-vars? opts) (multithread-namespaces? opts)))
@@ -194,10 +195,10 @@
   {:dir "test"
    :selector (constantly true)
    :capture-output false
-   :fail-fast true
+   :fail-fast false
    :multithread false
    :sort-vars false
-   :reporters [pretty/report]})
+   :reporters [progress/report]})
 
 (defn- ret->exit-code
   [{:as _ret :keys [error fail]}]
@@ -235,15 +236,13 @@
     :randomize-seed  - the random seed used to deterministically shuffle
                        test namespaces before running tests (defaults to 0).
     :reporters          - the test reporting functions to use
-                         (defaults to [eftest.report.progress/report])
+                         (defaults to [s-exp.eftest.report.progress/report])
     :test-warn-time  - print a warning for any test that exceeds this time
                        (measured in milliseconds)
     :exit-on-completion - whether to sys.exit or not at the end of the run - defaults: false"
   ([vars] (run-tests vars {}))
   ([vars opts]
-   (let [{:as opts
-          :keys [exit-on-completion reporters multithread]}
-         (merge default-options opts)
+   (let [{:as opts :keys [exit-on-completion reporters]} (merge default-options opts)
          start-time (System/nanoTime)]
      (cond-> (if (empty? vars)
                (do (println "No tests found.")
@@ -251,7 +250,7 @@
                (binding [report/*context* (atom {})
                          test/report (combined-reporter reporters)]
                  (test/do-report {:type :begin-test-run :count (count vars)})
-                 (let [executor (when multithread (threadpool-executor opts))
+                 (let [executor (when (multithread? opts) (threadpool-executor opts))
                        opts (assoc opts :executor executor)
                        counters (try (test-all vars opts)
                                      (finally (when executor (.shutdownNow executor))))
