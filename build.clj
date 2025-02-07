@@ -4,7 +4,7 @@
             [clojure.tools.build.tasks.process :as p]
             [deps-deploy.deps-deploy :as dd]))
 
-(def lib 'eftest/eftest)
+(def lib 'com.s-exp/eftest)
 (def version (format "1.0.%s" (b/git-count-revs nil)))
 (def class-dir "target/classes")
 (def copy-srcs ["src"])
