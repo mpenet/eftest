@@ -1,14 +1,13 @@
 (ns s-exp.eftest.runner
   "Functions to run tests written with clojure.test or compatible libraries."
   (:require [clojure.java.io :as io]
+            [clojure.set :as set]
             [clojure.test :as test]
             [clojure.tools.namespace.find :as find]
             [s-exp.eftest.output-capture :as capture]
-            [s-exp.eftest.report :as report]
-            ;; [s-exp.eftest.report.pretty :as pretty]
+            [s-exp.eftest.report :as report] ;; [s-exp.eftest.report.pretty :as pretty]
             [s-exp.eftest.report.progress :as progress])
-  (:import (java.util.concurrent Executors
-                                 ExecutorService)))
+  (:import (java.util.concurrent ExecutorService Executors)))
 
 (defmethod test/report :begin-test-run [_])
 
@@ -60,7 +59,7 @@
 (defn- default-thread-count []
   (+ 2 (.availableProcessors (Runtime/getRuntime))))
 
-(defn- ^ExecutorService threadpool-executor
+(defn- threadpool-executor ^ExecutorService
   [{:keys [thread-count] :or {thread-count (default-thread-count)}}]
   (Executors/newFixedThreadPool thread-count))
 
@@ -74,14 +73,16 @@
 (defn- pmap* [executor f xs]
   (pcalls* executor (map (fn [x] #(f x)) xs)))
 
-(defn- multithread-vars? [{:keys [multithread] :or {multithread true}}]
-  (or (true? multithread) (= multithread :vars)))
+(defn- multithread-vars?
+  [{:keys [multithread] :or {multithread #{:vars}}}]
+  (contains? multithread :vars))
 
-(defn- multithread-namespaces? [{:keys [multithread] :or {multithread true}}]
-  (or (true? multithread) (= multithread :namespaces)))
+(defn- multithread-namespaces?
+  [{:keys [multithread] :or {multithread #{:namespaces}}}]
+  (contains? multithread :namespaces))
 
 (defn- multithread? [opts]
-  (or (multithread-vars? opts) (multithread-namespaces? opts)))
+  (not-empty (:multithread opts)))
 
 (defn- fixture-exception [throwable]
   {:type :error
@@ -196,7 +197,7 @@
    :selector (constantly true)
    :capture-output false
    :fail-fast false
-   :multithread false
+   :multithread nil
    :sort-vars false
    :reporters [progress/report]})
 
@@ -219,27 +220,26 @@
 (defn run-tests
   "Run the supplied test vars. Accepts the following options:
 
-    :fail-fast      - if true, stop after first failure or error
-    :capture-output - if true, catch test output and print it only if
-                       the test fails (defaults to true)
-    :multithread    - one of: true, false, :namespaces or :vars (defaults to
-                       true). If set to true, namespaces and vars are run in
-                       parallel; if false, they are run in serial. If set to
-                       :namespaces, namespaces are run in parallel but the vars
-                       in those namespaces are run serially. If set to :vars,
-                       the namespaces are run serially, but the vars inside run
-                       in parallel.
-    :thread-count    - the number of threads used to run the tests in parallel
-                       (as per :multithread?). If not specified, the number
-                       reported by java.lang.Runtime.availableProcessors (which
-                       is not always accurate) *plus two* will be used.
-    :randomize-seed  - the random seed used to deterministically shuffle
-                       test namespaces before running tests (defaults to 0).
-    :reporters          - the test reporting functions to use
-                         (defaults to [s-exp.eftest.report.progress/report])
-    :test-warn-time  - print a warning for any test that exceeds this time
-                       (measured in milliseconds)
-    :exit-on-completion - whether to sys.exit or not at the end of the run - defaults: false"
+    :fail-fast - if true, stop after first failure or error
+    :capture-output - if true, catch test output and print it only if the test
+  fails (defaults to true)
+    :multithread - set of :namespaces or/and :vars (defaults to nil). If set to
+  namespaces and vars are run in parallel; otherwise, they are run in serial. If
+  set to :namespaces, namespaces are run in parallel but the vars in those
+  namespaces are run serially. If set to :vars, the namespaces are run serially,
+  but the vars inside run in parallel.
+    :thread-count - the number of threads used to run the tests in parallel (as
+  per :multithread). If not specified, the number reported by
+  java.lang.Runtime.availableProcessors (which is not always accurate) *plus
+  two* will be used.
+   :randomize-seed - the random seed used to deterministically shuffle test
+  namespaces before running tests (defaults to 0).
+    :reporters - the test reporting functions to use (defaults
+  to [s-exp.eftest.report.progress/report])
+    :test-warn-time - print a warning for any test that exceeds this
+  time (measured in milliseconds)
+    :exit-on-completion - whether to sys.exit or not at the end of the run -
+  defaults: false"
   ([vars] (run-tests vars {}))
   ([vars opts]
    (let [{:as opts :keys [exit-on-completion reporters]} (merge default-options opts)

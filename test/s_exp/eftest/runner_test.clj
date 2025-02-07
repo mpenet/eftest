@@ -53,7 +53,7 @@
                 (test-run-tests
                  '[s-exp.eftest.test-ns.single-failing-test
                    s-exp.eftest.test-ns.another-failing-test]
-                 {:fail-fast true, :multithread false}))]
+                 {:fail-fast true, :multithread nil}))]
     (is (= {:test 1 :fail 1} (select-keys result [:test :fail])))))
 
 (deftest test-fail-multi
