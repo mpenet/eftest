@@ -1,10 +1,9 @@
 (ns eftest.report.junit
   "A test reporter that outputs JUnit-compatible XML."
-  (:require [clojure.java.io :as io]
-            [clojure.stacktrace :as stack]
-            [clojure.test :as test]
-            [eftest.report :refer [*context*]]
-            [eftest.report :as report]))
+  (:require
+   [clojure.stacktrace :as stack]
+   [clojure.test :as test]
+   [eftest.report :as report :refer [*context*]]))
 
 ;; XML generation based on junit.clj
 
@@ -21,7 +20,7 @@
 
 (defn start-element [tag & [attrs]]
   (print (str "<" tag))
-  (if (seq attrs)
+  (when (seq attrs)
     (doseq [[key value] attrs]
       (print (str " " (name key) "=\"" (escape-xml value) "\""))))
   (print ">"))
@@ -86,27 +85,27 @@
 
 (defmulti report :type)
 
-(defmethod report :default [m])
+(defmethod report :default [_m])
 
-(defmethod report :begin-test-run [m]
+(defmethod report :begin-test-run [_m]
   (swap! *context* assoc ::test-results {})
   (test/with-test-out
     (println "<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
     (print "<testsuites>")))
 
-(defmethod report :summary [m]
+(defmethod report :summary [_m]
   (test/with-test-out
     (println "</testsuites>")))
 
 (defmethod report :begin-test-ns [m]
   (let [ns (name (ns-name (:ns m)))
-        f  #(test/with-test-out (start-suite ns))]
+        f #(test/with-test-out (start-suite ns))]
     (swap! *context* assoc-in [::deferred-report ns] f)))
 
 (defmethod report :end-test-ns [m]
   (let [ns (name (ns-name (:ns m)))
-        g  (get-in @*context* [::deferred-report ns])
-        f  #(test/with-test-out (finish-suite))]
+        g (get-in @*context* [::deferred-report ns])
+        f #(test/with-test-out (finish-suite))]
     (locking flush-lock (g) (f))
     (swap! *context* update ::deferred-report dissoc ns)))
 
@@ -118,24 +117,24 @@
         duration (- (System/nanoTime)
                     (get-in @*context* [::test-start-times (:var m)]))
         testing-vars test/*testing-vars*
-        f  #(test/with-test-out
-              (let [test-var (:var m)
-                    time (format "%.03f" (/ duration 1e9))
-                    results  (get-in @*context* [::test-results test-var])]
-                (start-case (test-name testing-vars) ns time)
-                (doseq [result results]
-                  (if (= :fail (:type result))
-                    (failure-el result)
-                    (error-el result)))
-                (finish-case)
-                (swap! *context* update ::test-results dissoc test-var)))]
+        f #(test/with-test-out
+             (let [test-var (:var m)
+                   time (format "%.03f" (/ duration 1e9))
+                   results (get-in @*context* [::test-results test-var])]
+               (start-case (test-name testing-vars) ns time)
+               (doseq [result results]
+                 (if (= :fail (:type result))
+                   (failure-el result)
+                   (error-el result)))
+               (finish-case)
+               (swap! *context* update ::test-results dissoc test-var)))]
     (swap! *context* update-in [::deferred-report ns] (partial combine f))))
 
 (defn- push-result [result]
   (let [test-var (first test/*testing-vars*)]
     (swap! *context* update-in [::test-results test-var] conj result)))
 
-(defmethod report :pass [m]
+(defmethod report :pass [_m]
   (test/inc-report-counter :pass))
 
 (defmethod report :fail [m]

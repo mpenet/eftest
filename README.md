@@ -1,19 +1,13 @@
 # Eftest
 
-[![Build Status](https://travis-ci.org/weavejester/eftest.svg?branch=master)](https://travis-ci.org/weavejester/eftest)
+/!\ This is a fork of weavejester eftest with changes to make it more t.deps
+friendly and providing more helpers.
 
 Eftest is a fast and pretty Clojure test runner.
 
 ## Installation
 
-To install, add the following to your project `:dependencies`:
-
-    [eftest "0.6.0"]
-
-Alternatively, if you just want to use Eftest as a `lein test`
-replacement, add the following to your project `:plugins`:
-
-    [lein-eftest "0.6.0"]
+eftest is [available on Clojars](https://clojars.org/mpenet/eftest).
 
 ## Screenshots
 
@@ -194,40 +188,19 @@ logging long tests.
 user=> (run-tests (find-tests "test") {:test-warn-time 500})
 ```
 
-### Plugin
-
-To use the Lein-Eftest plugin, just run:
-
-```sh
-lein eftest
-```
-
-You can customize the reporter and configure the concurrency settings
-by adding an `:eftest` key to your project map:
-
-```clojure
-:eftest {:multithread? :vars
-         :thread-count 4
-         :report eftest.report.junit/report
-         ;; You can optionally write the output to a file like so:
-         :report-to-file "target/junit.xml"}
-```
-
-Leiningen test selectors also work. With namespaces:
-
-```sh
-lein eftest foo.bar-test foo.baz-test
-```
-
-And with metadata keywords:
-
-```sh
-lein eftest :integration
-```
-
 ## License
 
+Up to 5a367d5ebd5fef2062b310d7c4602fdc4785edde
+
 Copyright © 2019 James Reeves
+
+Distributed under the Eclipse Public License either version 1.0 or (at
+your option) any later version.
+
+
+After 5a367d5ebd5fef2062b310d7c4602fdc4785edde
+
+Copyright © 2025 Max Penet
 
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.
