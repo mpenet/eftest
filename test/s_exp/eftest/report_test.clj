@@ -1,12 +1,12 @@
 (ns s-exp.eftest.report-test
   (:require [clojure.java.io :as io]
             [clojure.test :refer :all]
-            [eftest.output-capture :as output-capture]
-            [eftest.report :as report]
-            [eftest.report.junit :as junit]
-            [eftest.report.pretty :as pretty]
-            [eftest.runner :as sut]
-            [puget.printer :as puget]))
+            [puget.printer :as puget]
+            [s-exp.eftest.output-capture :as output-capture]
+            [s-exp.eftest.report :as report]
+            [s-exp.eftest.report.junit :as junit]
+            [s-exp.eftest.report.pretty :as pretty]
+            [s-exp.eftest.runner :as sut]))
 
 (in-ns 's-exp.eftest.test-ns.single-failing-test)
 (clojure.core/refer-clojure)
