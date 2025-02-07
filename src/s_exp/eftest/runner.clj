@@ -1,4 +1,4 @@
-(ns eftest.runner
+(ns s-exp.eftest.runner
   "Functions to run tests written with clojure.test or compatible libraries."
   (:require [clojure.java.io :as io]
             [clojure.test :as test]

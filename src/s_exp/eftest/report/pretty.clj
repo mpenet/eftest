@@ -1,4 +1,4 @@
-(ns eftest.report.pretty
+(ns s-exp.eftest.report.pretty
   "A test reporter with an emphasis on pretty formatting."
   (:require [clojure.data :as data]
             [clojure.string :as str]

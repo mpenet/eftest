@@ -1,9 +1,9 @@
-(ns eftest.report.progress
+(ns s-exp.eftest.report.progress
   "A test reporter with a progress bar."
   (:require [clojure.test :as test]
-            [eftest.report :as report]
-            [eftest.report.pretty :as pretty]
-            [progrock.core :as prog]))
+            [progrock.core :as prog]
+            [s-exp.eftest.report :as report]
+            [s-exp.eftest.report.pretty :as pretty]))
 
 (def ^:private clear-line (apply str "\r" (repeat 80 " ")))
 

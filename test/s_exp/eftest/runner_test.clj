@@ -1,6 +1,6 @@
 (ns s-exp.eftest.runner-test
   (:require [clojure.test :refer :all]
-            [eftest.runner :as sut]))
+            [s-exp.eftest.runner :as sut]))
 
 (in-ns 's-exp.eftest.test-ns.single-failing-test)
 (clojure.core/refer-clojure)
@@ -53,7 +53,7 @@
                 (test-run-tests
                  '[s-exp.eftest.test-ns.single-failing-test
                    s-exp.eftest.test-ns.another-failing-test]
-                 {:fail-fast? true, :multithread? false}))]
+                 {:fail-fast true, :multithread false}))]
     (is (= {:test 1 :fail 1} (select-keys result [:test :fail])))))
 
 (deftest test-fail-multi
