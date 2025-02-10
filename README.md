@@ -29,12 +29,12 @@ And when a test throws an exception, it looks like:
 
 Eftest has two main functions: `find-tests` and `run-tests`.
 
-The `find-tests` function searches a source, which can be a namespace,
-directory path, symbol, var, or a collection of any of the previous.
-It returns a collection of test vars found in the source.
+The `find-tests` function searches a source, which can be a namespace, directory
+path, symbol, var, or a collection of any of the previous.  It returns a
+collection of test vars found in the source.
 
-The `run-tests` function accepts a collection of test vars and runs
-them, delivering a report on the tests as it goes.
+The `run-tests` function accepts a collection of test vars and runs them,
+delivering a report on the tests as it goes.
 
 Typically these two functions are used together:
 
@@ -49,33 +49,32 @@ The above example will run all tests found in the "test" directory.
 
 #### Multithreading
 
-By default Eftest runs all tests in parallel, which can cause issues
-with tests that expect to be single-threaded. To disable this and set
-all tests to be executed in serial, set the `:multithread` option to
-`false`:
+By default Eftest runs all tests in parallel, which can cause issues with tests
+that expect to be single-threaded. To disable this and set all tests to be
+executed in serial, set the `:multithread` option to `nil` or `#{}`.
 
 ```clojure
-user=> (run-tests (find-tests "test") {:multithread false})
+user=> (run-tests (find-tests "test") {:multithread nil})
 ```
 
 If you want the test vars inside a namespace to be executed in
 parallel, but the namespaces themselves to be executed in serial, then
-set the `:multithread?` option to `:vars`:
+set the `:multithread` option to include `:vars`:
 
 ```clojure
-user=> (run-tests (find-tests "test") {:multithread :vars})
+user=> (run-tests (find-tests "test") {:multithread #{:vars}})
 ```
 
 If you want the vars inside a namespace to execute in serial, but the
-namespaces to be executed in parallel, set the `:multithread?` option
-to `:namespaces`:
+namespaces to be executed in parallel, set the `:multithread` option
+to include `:namespaces`:
 
 ```clojure
-user=> (run-tests (find-tests "test") {:multithread :namespaces})
+user=> (run-tests (find-tests "test") {:multithread #{:namespaces}})
 ```
 
-Alternatively, you can add the `:eftest/synchronized` key as metadata
-to any tests you want to force to be executed in serial:
+Alternatively, you can add the `:eftest/synchronized` key as metadata to any
+tests you want to force to be executed in serial:
 
 ```clojure
 (deftest ^:eftest/synchronized a-test
@@ -105,9 +104,9 @@ circumstances, such as [in a CircleCI test container][resource-class],
 [availableprocessors]: https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Runtime.html#availableProcessors()
 [resource-class]: https://circleci.com/docs/2.0/configuration-reference/#resource_class
 
-Users can override the default behavior by including the key `:thread-count`
-in the options map supplied to `run-tests` with the value being any
-positive integer:
+Users can override the default behavior by including the key `:thread-count` in
+the options map supplied to `run-tests` with the value being any positive
+integer:
 
 ```clojure
 user=> (run-tests (find-tests "test") {:thread-count 4})
@@ -115,8 +114,8 @@ user=> (run-tests (find-tests "test") {:thread-count 4})
 
 #### Reporting
 
-You can also change the reporting function used. For example, if you
-want a colorized reporter but without the progress bar:
+You can also change the reporting function used. For example, if you want a
+colorized reporter but without the progress bar:
 
 ```clojure
 user=> (run-tests (find-tests "test") {:report s-exp.eftest.report.pretty/report})
@@ -162,7 +161,7 @@ user=> (run-tests (find-tests "test") {:capture-output false})
 #### Fast failure
 
 Sometimes it's useful to end the testing on the first test failure. To
-do this set the `:fail-fast?` option to `true`:
+do this set the `:fail-fast` option to `true`:
 p
 ```clojure
 user=> (run-tests (find-tests "test") {:fail-fast true})

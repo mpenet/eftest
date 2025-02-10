@@ -1,11 +1,10 @@
 (ns s-exp.eftest.runner
   "Functions to run tests written with clojure.test or compatible libraries."
   (:require [clojure.java.io :as io]
-            [clojure.set :as set]
             [clojure.test :as test]
             [clojure.tools.namespace.find :as find]
             [s-exp.eftest.output-capture :as capture]
-            [s-exp.eftest.report :as report] ;; [s-exp.eftest.report.pretty :as pretty]
+            [s-exp.eftest.report :as report]
             [s-exp.eftest.report.progress :as progress])
   (:import (java.util.concurrent ExecutorService Executors)))
 
@@ -74,15 +73,16 @@
   (pcalls* executor (map (fn [x] #(f x)) xs)))
 
 (defn- multithread-vars?
-  [{:keys [multithread] :or {multithread #{:vars}}}]
+  [{:keys [multithread]}]
   (contains? multithread :vars))
 
 (defn- multithread-namespaces?
-  [{:keys [multithread] :or {multithread #{:namespaces}}}]
+  [{:keys [multithread]}]
   (contains? multithread :namespaces))
 
-(defn- multithread? [opts]
-  (not-empty (:multithread opts)))
+(defn- multithread?
+  [opts]
+  (seq (:multithread opts)))
 
 (defn- fixture-exception [throwable]
   {:type :error
@@ -116,8 +116,14 @@
         (once-fixtures
          (fn []
            (if (multithread-vars? opts)
-             (do (->> vars (filter synchronized?) (map test-var) (dorun))
-                 (->> vars (remove synchronized?) (pmap* executor test-var) (dorun)))
+             (do (->> vars
+                      (filter synchronized?)
+                      (map test-var)
+                      (dorun))
+                 (->> vars
+                      (remove synchronized?)
+                      (pmap* executor test-var)
+                      (dorun)))
              (doseq [v vars] (test-var v)))))
         (catch Throwable t
           (test/do-report (fixture-exception t)))))))
@@ -143,11 +149,13 @@
                 (deterministic-shuffle randomize-seed)
                 (mapf (fn [[ns vars]] (test-ns ns vars report opts)))
                 (apply merge-with +))]
-    (try (if capture-output
-           (capture/with-capture (f))
-           (f))
-         (finally (when (realized? executor)
-                    (.shutdownNow @executor))))))
+    (try
+      (if capture-output
+        (capture/with-capture (f))
+        (f))
+      (finally
+        (when (realized? executor)
+          (.shutdownNow @executor))))))
 
 (defn- require-namespaces-in-dir [dir]
   (map (fn [ns] (require ns) (find-ns ns)) (find/find-namespaces-in-dir dir)))
@@ -197,7 +205,7 @@
    :selector (constantly true)
    :capture-output false
    :fail-fast false
-   :multithread nil
+   :multithread #{:vars :namespaces}
    :sort-vars false
    :reporters [progress/report]})
 
@@ -242,7 +250,7 @@
   defaults: false"
   ([vars] (run-tests vars {}))
   ([vars opts]
-   (let [{:as opts :keys [exit-on-completion reporters]} (merge default-options opts)
+   (let [{:as opts :keys [exit-on-completion reporters]} (into default-options opts)
          start-time (System/nanoTime)]
      (cond-> (if (empty? vars)
                (do (println "No tests found.")
@@ -250,10 +258,13 @@
                (binding [report/*context* (atom {})
                          test/report (combined-reporter reporters)]
                  (test/do-report {:type :begin-test-run :count (count vars)})
-                 (let [executor (when (multithread? opts) (threadpool-executor opts))
+                 (let [executor (when (multithread? opts)
+                                  (threadpool-executor opts))
                        opts (assoc opts :executor executor)
-                       counters (try (test-all vars opts)
-                                     (finally (when executor (.shutdownNow executor))))
+                       counters (try
+                                  (test-all vars opts)
+                                  (finally
+                                    (when executor (.shutdownNow executor))))
                        duration (/ (- (System/nanoTime) start-time) 1e6)
                        summary (assoc counters :type :summary :duration duration)]
                    (test/do-report summary)
