@@ -1,31 +1,31 @@
-(ns eftest.report.pretty
+(ns s-exp.eftest.report.pretty
   "A test reporter with an emphasis on pretty formatting."
-  (:require [clojure.test :as test]
-            [clojure.data :as data]
+  (:require [clojure.data :as data]
+            [clojure.string :as str]
+            [clojure.test :as test]
+            [fipp.engine :as fipp]
             [io.aviso.ansi :as ansi]
             [io.aviso.exception :as exception]
             [io.aviso.repl :as repl]
             [puget.printer :as puget]
-            [fipp.engine :as fipp]
-            [eftest.output-capture :as capture]
-            [eftest.report :as report]
-            [clojure.string :as str]))
+            [s-exp.eftest.output-capture :as capture]
+            [s-exp.eftest.report :as report]))
 
 (def ^:dynamic *fonts*
   "The ANSI codes to use for reporting on tests."
-  {:exception      ansi/red-font
-   :reset          ansi/reset-font
-   :message        ansi/italic-font
-   :property       ansi/bold-font
-   :source         ansi/italic-font
-   :function-name  ansi/blue-font
-   :clojure-frame  ansi/white-font
-   :java-frame     ansi/reset-font
-   :omitted-frame  ansi/reset-font
-   :pass           ansi/green-font
-   :fail           ansi/red-font
-   :error          ansi/red-font
-   :divider        ansi/yellow-font})
+  {:exception ansi/red-font
+   :reset ansi/reset-font
+   :message ansi/italic-font
+   :property ansi/bold-font
+   :source ansi/italic-font
+   :function-name ansi/blue-font
+   :clojure-frame ansi/white-font
+   :java-frame ansi/reset-font
+   :omitted-frame ansi/reset-font
+   :pass ansi/green-font
+   :fail ansi/red-font
+   :error ansi/red-font
+   :divider ansi/yellow-font})
 
 (def ^:dynamic *divider*
   "The divider to use between test failure and error reports."
@@ -60,24 +60,24 @@
         p (pretty-printer)]
     (doseq [[actual [a b]] (diff-all expected actuals)]
       (pprint-document
-        [:group
-         [:span "expected: " (puget/format-doc p expected) :break]
-         [:span "  actual: " (puget/format-doc p actual) :break]
-         (when (and (not= expected a) (not= actual b))
-           [:span "    diff: "
-            (if a
-              [:span "- " (puget/format-doc p a) :break])
-            (if b
-              [:span
-               (if a  "          + " "+ ")
-               (puget/format-doc p b)])])]))))
+       [:group
+        [:span "expected: " (puget/format-doc p expected) :break]
+        [:span "  actual: " (puget/format-doc p actual) :break]
+        (when (and (not= expected a) (not= actual b))
+          [:span "    diff: "
+           (if a
+             [:span "- " (puget/format-doc p a) :break])
+           (if b
+             [:span
+              (if a "          + " "+ ")
+              (puget/format-doc p b)])])]))))
 
 (defn- predicate-fail-report [{:keys [expected actual]}]
   (let [p (pretty-printer)]
     (pprint-document
-      [:group
-       [:span "expected: " (puget/format-doc p expected) :break]
-       [:span "  actual: " (puget/format-doc p actual)]])))
+     [:group
+      [:span "expected: " (puget/format-doc p expected) :break]
+      [:span "  actual: " (puget/format-doc p actual)]])))
 
 (defn- print-stacktrace [t]
   (binding [exception/*traditional* true
@@ -154,6 +154,6 @@
       (println "Ran" test "tests in" (format-interval duration))
       (println (str color
                     total " " (pluralize "assertion" total) ", "
-                    fail  " " (pluralize "failure" fail) ", "
+                    fail " " (pluralize "failure" fail) ", "
                     error " " (pluralize "error" error) "."
                     (:reset *fonts*))))))

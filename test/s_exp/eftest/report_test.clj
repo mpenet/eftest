@@ -1,20 +1,20 @@
-(ns eftest.report-test
-  (:require [clojure.test :refer :all]
-            [clojure.java.io :as io]
-            [eftest.report.junit :as junit]
-            [eftest.runner :as sut]
+(ns s-exp.eftest.report-test
+  (:require [clojure.java.io :as io]
+            [clojure.test :refer :all]
             [puget.printer :as puget]
-            [eftest.report.pretty :as pretty]
-            [eftest.output-capture :as output-capture]
-            [eftest.report :as report]))
+            [s-exp.eftest.output-capture :as output-capture]
+            [s-exp.eftest.report :as report]
+            [s-exp.eftest.report.junit :as junit]
+            [s-exp.eftest.report.pretty :as pretty]
+            [s-exp.eftest.runner :as sut]))
 
-(in-ns 'eftest.test-ns.single-failing-test)
+(in-ns 's-exp.eftest.test-ns.single-failing-test)
 (clojure.core/refer-clojure)
 (clojure.core/require 'clojure.test)
 (clojure.test/deftest single-failing-test
   (clojure.test/is (= 1 2)))
 
-(in-ns 'eftest.report-test)
+(in-ns 's-exp.eftest.report-test)
 
 (defn delete-dir [file]
   (doseq [f (reverse (file-seq file))]
@@ -22,10 +22,10 @@
 
 (deftest report-to-file-test
   (delete-dir (io/file "target/test-out"))
-  (-> 'eftest.test-ns.single-failing-test
+  (-> 's-exp.eftest.test-ns.single-failing-test
       sut/find-tests
-      (sut/run-tests {:report (report/report-to-file junit/report "target/test-out/junit.xml")}))
-  (is (string? (slurp "target/test-out/junit.xml"))))
+      (sut/run-tests {:reporters [(report/report-to-file junit/report "junit.xml")]}))
+  (is (string? (slurp "junit.xml"))))
 
 (def this-ns *ns*)
 
@@ -42,7 +42,7 @@
                                      :file "report_test.clj"
                                      :line 999
                                      :message "foo"}))))]
-    (is (= (str "\nFAIL in eftest.report-test/file-and-line-in-pretty-fail-report"
+    (is (= (str "\nFAIL in s-exp.eftest.report-test/file-and-line-in-pretty-fail-report"
                 " (report_test.clj:999)\n"
                 "foo\n"
                 "expected: "

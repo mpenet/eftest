@@ -1,6 +1,8 @@
-(ns eftest.output-capture
-  (:require [clojure.string :as str])
-  (:import [java.io OutputStream ByteArrayOutputStream PrintStream PrintWriter]))
+(ns s-exp.eftest.output-capture
+  (:import (java.io OutputStream
+                    ByteArrayOutputStream
+                    PrintStream
+                    PrintWriter)))
 
 (def ^:dynamic *test-buffer* nil)
 
@@ -33,16 +35,16 @@
        (doto-capture-buffer #(.write % data off len))))))
 
 (defn init-capture []
-  (let [old-out             System/out
-        old-err             System/err
+  (let [old-out System/out
+        old-err System/err
         proxy-output-stream (create-proxy-output-stream)
-        new-stream          (PrintStream. proxy-output-stream)
-        new-writer          (PrintWriter. proxy-output-stream)]
+        new-stream (PrintStream. proxy-output-stream)
+        new-writer (PrintWriter. proxy-output-stream)]
     (System/setOut new-stream)
     (System/setErr new-stream)
     {:captured-writer new-writer
-     :old-system-out  old-out
-     :old-system-err  old-err}))
+     :old-system-out old-out
+     :old-system-err old-err}))
 
 (defn restore-capture [{:keys [old-system-out old-system-err]}]
   (System/setOut old-system-out)
@@ -50,10 +52,10 @@
 
 (defmacro with-capture [& body]
   `(let [context# (init-capture)
-         writer#  (:captured-writer context#)]
+         writer# (:captured-writer context#)]
      (try
-       (binding [*out* writer#, *err* writer#]
-         (with-redefs [*out* writer#, *err* writer#]
+       (binding [*out* writer# *err* writer#]
+         (with-redefs [*out* writer# *err* writer#]
            ~@body))
        (finally
          (restore-capture context#)))))
