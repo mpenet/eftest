@@ -231,11 +231,12 @@
     :fail-fast - if true, stop after first failure or error
     :capture-output - if true, catch test output and print it only if the test
   fails (defaults to true)
-    :multithread - set of :namespaces or/and :vars (defaults to nil). If set to
-  namespaces and vars are run in parallel; otherwise, they are run in serial. If
-  set to :namespaces, namespaces are run in parallel but the vars in those
-  namespaces are run serially. If set to :vars, the namespaces are run serially,
-  but the vars inside run in parallel.
+    :multithread - set of :namespaces or/and :vars (defaults to
+  #{:vars :namespaces}). If set to namespaces and vars are run in parallel;
+  otherwise, they are run in serial. If set to :namespaces, namespaces are run
+  in parallel but the vars in those namespaces are run serially. If set
+  to :vars, the namespaces are run serially, but the vars inside run in
+  parallel.
     :thread-count - the number of threads used to run the tests in parallel (as
   per :multithread). If not specified, the number reported by
   java.lang.Runtime.availableProcessors (which is not always accurate) *plus
